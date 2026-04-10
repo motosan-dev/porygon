@@ -351,7 +351,7 @@ async fn e2e_unsupported_list_tasks() {
         .unwrap_err();
     match err {
         ClientError::Rpc { code, .. } => {
-            assert_eq!(code, -32002); // Unsupported
+            assert_eq!(code, -32004); // UnsupportedOperation
         }
         other => panic!("expected RPC error, got: {other}"),
     }

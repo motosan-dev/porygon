@@ -18,8 +18,10 @@ use tokio_stream::wrappers::UnboundedReceiverStream;
 use tokio_stream::Stream;
 
 use a2a_types::{
-    CancelTaskRequest, GetTaskRequest, JsonRpcRequest, JsonRpcResponse, ListTasksRequest,
-    SendMessageRequest, StreamResponse, SubscribeToTaskRequest,
+    CancelTaskRequest, DeleteTaskPushNotificationConfigRequest, GetExtendedAgentCardRequest,
+    GetTaskPushNotificationConfigRequest, GetTaskRequest, JsonRpcRequest, JsonRpcResponse,
+    ListTaskPushNotificationConfigsRequest, ListTasksRequest, SendMessageRequest, StreamResponse,
+    SubscribeToTaskRequest, TaskPushNotificationConfig,
 };
 
 use crate::handler::{A2AError, A2AHandler};
@@ -42,11 +44,27 @@ async fn agent_card_handler<H: A2AHandler>(
     Json(handler.agent_card())
 }
 
+/// Supported A2A protocol version.
+const SUPPORTED_VERSION: &str = "1.0";
+
 async fn jsonrpc_handler<H: A2AHandler>(
     State(handler): State<Arc<H>>,
+    headers: axum::http::HeaderMap,
     Json(mut req): Json<JsonRpcRequest>,
 ) -> axum::response::Response {
     let id = req.id.clone();
+
+    // Validate A2A-Version header if present
+    if let Some(version) = headers.get("a2a-version").and_then(|v| v.to_str().ok()) {
+        if version != SUPPORTED_VERSION {
+            return error_response(
+                id,
+                A2AError::VersionNotSupported(format!(
+                    "requested {version}, supported {SUPPORTED_VERSION}"
+                )),
+            );
+        }
+    }
 
     match req.method.as_str() {
         "message/send" => {
@@ -106,6 +124,56 @@ async fn jsonrpc_handler<H: A2AHandler>(
             };
             match handler.subscribe_to_task(params).await {
                 Ok(stream) => stream_to_sse(id, stream),
+                Err(e) => error_response(id, e),
+            }
+        }
+        "tasks/pushNotificationConfig/set" => {
+            let params: TaskPushNotificationConfig = match parse_params(&mut req) {
+                Ok(p) => p,
+                Err(e) => return error_response(id, e),
+            };
+            match handler.create_push_notification_config(params).await {
+                Ok(config) => success_response(id, &config),
+                Err(e) => error_response(id, e),
+            }
+        }
+        "tasks/pushNotificationConfig/get" => {
+            let params: GetTaskPushNotificationConfigRequest = match parse_params(&mut req) {
+                Ok(p) => p,
+                Err(e) => return error_response(id, e),
+            };
+            match handler.get_push_notification_config(params).await {
+                Ok(config) => success_response(id, &config),
+                Err(e) => error_response(id, e),
+            }
+        }
+        "tasks/pushNotificationConfig/list" => {
+            let params: ListTaskPushNotificationConfigsRequest = match parse_params(&mut req) {
+                Ok(p) => p,
+                Err(e) => return error_response(id, e),
+            };
+            match handler.list_push_notification_configs(params).await {
+                Ok(result) => success_response(id, &result),
+                Err(e) => error_response(id, e),
+            }
+        }
+        "tasks/pushNotificationConfig/delete" => {
+            let params: DeleteTaskPushNotificationConfigRequest = match parse_params(&mut req) {
+                Ok(p) => p,
+                Err(e) => return error_response(id, e),
+            };
+            match handler.delete_push_notification_config(params).await {
+                Ok(()) => success_response(id, &serde_json::json!({})),
+                Err(e) => error_response(id, e),
+            }
+        }
+        "agent/extendedCard" => {
+            let params: GetExtendedAgentCardRequest = match parse_params(&mut req) {
+                Ok(p) => p,
+                Err(e) => return error_response(id, e),
+            };
+            match handler.get_extended_agent_card(params).await {
+                Ok(card) => success_response(id, &card),
                 Err(e) => error_response(id, e),
             }
         }
@@ -374,7 +442,7 @@ mod tests {
             .unwrap();
         let rpc_resp: JsonRpcResponse = serde_json::from_slice(&body).unwrap();
         assert!(rpc_resp.error.is_some());
-        assert_eq!(rpc_resp.error.unwrap().code, -32002); // Unsupported
+        assert_eq!(rpc_resp.error.unwrap().code, -32004); // UnsupportedOperation
     }
 
     #[tokio::test]
