@@ -1,0 +1,12 @@
+[package]
+name = "ag-ui-motosan"
+version = "0.1.0"
+edition = "2021"
+description = "ag-ui protocol adapter for motosan-agent-loop"
+
+[dependencies]
+motosan-agent-loop = { workspace = true }
+motosan-agent-tool = { workspace = true }
+
+[dev-dependencies]
+serde_json = "1"

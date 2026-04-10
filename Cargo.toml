@@ -1,0 +1,16 @@
+[workspace]
+members = [
+  "crates/ag-ui-motosan",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+version = "0.1.0"
+license = "MIT"
+
+[workspace.dependencies]
+syncable-ag-ui-core = "0.2"
+motosan-agent-loop = { version = "0.9.4", features = ["motosan-ai", "mcp-client"] }
+motosan-agent-tool = "0.3"
+serde_json = "1"
