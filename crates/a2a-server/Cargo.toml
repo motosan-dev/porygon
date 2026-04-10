@@ -1,12 +1,20 @@
 [package]
-name = "a2a-server"
+name = "porygon-a2a-server"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "A2A v1.0 server — handler traits and axum transport"
+repository = "https://github.com/motosan-dev/porygon"
+homepage = "https://github.com/motosan-dev/porygon"
+readme = "README.md"
+keywords = ["a2a", "agent", "server", "axum"]
+categories = ["web-programming::http-server", "network-programming"]
+
+[lib]
+name = "a2a_server"
 
 [dependencies]
-a2a-types = { path = "../a2a-types" }
+a2a-types = { path = "../a2a-types", package = "porygon-a2a-types" }
 axum = "0.8"
 async-trait = "0.1"
 tokio = { version = "1", features = ["full"] }
@@ -19,6 +27,6 @@ thiserror = "2"
 
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
-a2a-client = { path = "../a2a-client" }
+a2a-client = { path = "../a2a-client", package = "porygon-a2a-client" }
 reqwest = { version = "0.12", features = ["json"] }
 futures-util = "0.3"

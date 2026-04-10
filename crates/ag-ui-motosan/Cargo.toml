@@ -1,8 +1,17 @@
 [package]
-name = "ag-ui-motosan"
+name = "porygon-ag-ui-motosan"
 version = "0.1.0"
 edition = "2021"
-description = "ag-ui protocol adapter for motosan-agent-loop"
+license = "MIT"
+description = "AG-UI protocol adapter for motosan-agent-loop"
+repository = "https://github.com/motosan-dev/porygon"
+homepage = "https://github.com/motosan-dev/porygon"
+readme = "README.md"
+keywords = ["ag-ui", "agent", "motosan", "adapter"]
+categories = ["api-bindings"]
+
+[lib]
+name = "ag_ui_motosan"
 
 [dependencies]
 motosan-agent-loop = { workspace = true }

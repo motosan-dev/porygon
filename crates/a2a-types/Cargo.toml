@@ -1,9 +1,17 @@
 [package]
-name = "a2a-types"
+name = "porygon-a2a-types"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "A2A v1.0 protocol types — auto-generated from official protobuf"
+repository = "https://github.com/motosan-dev/porygon"
+homepage = "https://github.com/motosan-dev/porygon"
+readme = "README.md"
+keywords = ["a2a", "agent", "protocol", "protobuf"]
+categories = ["api-bindings", "network-programming"]
+
+[lib]
+name = "a2a_types"
 
 [dependencies]
 prost = "0.13"

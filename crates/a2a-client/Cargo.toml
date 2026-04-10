@@ -1,12 +1,20 @@
 [package]
-name = "a2a-client"
+name = "porygon-a2a-client"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
 description = "A2A v1.0 client — reqwest-based HTTP client for A2A agents"
+repository = "https://github.com/motosan-dev/porygon"
+homepage = "https://github.com/motosan-dev/porygon"
+readme = "README.md"
+keywords = ["a2a", "agent", "client", "reqwest"]
+categories = ["web-programming::http-client", "network-programming"]
+
+[lib]
+name = "a2a_client"
 
 [dependencies]
-a2a-types = { path = "../a2a-types" }
+a2a-types = { path = "../a2a-types", package = "porygon-a2a-types" }
 reqwest = { version = "0.12", features = ["json", "stream"] }
 tokio = { version = "1", features = ["macros"] }
 futures-util = "0.3"
