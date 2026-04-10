@@ -1,0 +1,26 @@
+# Porygon
+
+Agent protocol implementations in Rust covering A2A (Agent-to-Agent) v1.0 and AG-UI.
+
+## Crates
+
+- [porygon-a2a-types](crates/a2a-types/src/lib.rs): A2A v1.0 protocol types auto-generated from official protobuf. Includes Task, Message, Part, Artifact, AgentCard, and all request/response types with serde JSON support.
+- [porygon-a2a-server](crates/a2a-server/src/lib.rs): A2A server with A2AHandler trait and axum JSON-RPC router. Supports all 11 A2A methods including SSE streaming, push notifications, and extended agent card.
+- [porygon-a2a-client](crates/a2a-client/src/lib.rs): A2A HTTP client using reqwest. Supports blocking JSON-RPC calls, SSE streaming, and bearer token authentication.
+- [porygon-ag-ui-motosan](crates/ag-ui-motosan/src/lib.rs): AG-UI protocol adapter for motosan-agent-loop. Translates AgentEvent into AgUiAction for SSE streaming to frontends.
+
+## Key Types
+
+- [A2AHandler trait](crates/a2a-server/src/handler.rs): Core server trait with send_message, send_streaming_message, get_task, list_tasks, cancel_task, subscribe_to_task, push notification methods, and get_extended_agent_card.
+- [A2AError](crates/a2a-server/src/handler.rs): Error enum with JSON-RPC error codes -32001 through -32009 per A2A v1.0 spec.
+- [A2AClient](crates/a2a-client/src/lib.rs): HTTP client with new(), with_bearer_token(), send_message(), send_streaming_message(), get_task(), list_tasks(), cancel_task(), subscribe_to_task(), get_agent_card().
+- [a2a_router](crates/a2a-server/src/router.rs): Axum router factory. Routes: GET /.well-known/agent.json (agent card), POST / (JSON-RPC dispatch).
+- [AgUiAction](crates/ag-ui-motosan/src/lib.rs): Enum with TextChunk, TextDone, ToolStarted, ToolCompleted variants.
+
+## Proto Source
+
+- [a2a.proto](crates/a2a-types/proto/a2a.proto): Stripped version of official A2A v1.0 protobuf (no google/api imports, no gRPC service block). Auto-generates Rust types via prost + pbjson in build.rs.
+
+## Optional
+
+- [Integration tests](crates/a2a-server/tests/integration.rs): End-to-end tests with real HTTP server and client covering agent card, send_message, get_task, cancel_task, SSE streaming, error handling, and malformed JSON-RPC.
