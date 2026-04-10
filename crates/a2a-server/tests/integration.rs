@@ -173,11 +173,65 @@ impl A2AHandler for TestAgent {
 }
 
 // ---------------------------------------------------------------------------
+// Error-mid-stream handler
+// ---------------------------------------------------------------------------
+
+struct ErrorStreamAgent;
+
+#[async_trait::async_trait]
+impl A2AHandler for ErrorStreamAgent {
+    fn agent_card(&self) -> AgentCard {
+        AgentCard {
+            name: "error-agent".into(),
+            description: "Errors mid-stream".into(),
+            version: "1.0.0".into(),
+            ..Default::default()
+        }
+    }
+
+    async fn send_message(
+        &self,
+        _req: SendMessageRequest,
+    ) -> Result<SendMessageResponse, A2AError> {
+        Err(A2AError::Internal("not implemented".into()))
+    }
+
+    async fn send_streaming_message(
+        &self,
+        _req: SendMessageRequest,
+    ) -> Result<Pin<Box<dyn Stream<Item = Result<StreamResponse, A2AError>> + Send>>, A2AError>
+    {
+        let events: Vec<Result<StreamResponse, A2AError>> = vec![
+            // First event OK
+            Ok(StreamResponse {
+                payload: Some(stream_response::Payload::StatusUpdate(
+                    TaskStatusUpdateEvent {
+                        task_id: "task-err".into(),
+                        context_id: "ctx-1".into(),
+                        status: Some(TaskStatus {
+                            state: TaskState::Working as i32,
+                            ..Default::default()
+                        }),
+                        ..Default::default()
+                    },
+                )),
+            }),
+            // Second event is an error
+            Err(A2AError::Internal("something exploded".into())),
+        ];
+        Ok(Box::pin(tokio_stream::iter(events)))
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Helper: start server on random port, return base URL
 // ---------------------------------------------------------------------------
 
 async fn start_server() -> String {
-    let handler = Arc::new(TestAgent);
+    start_server_with(Arc::new(TestAgent)).await
+}
+
+async fn start_server_with<H: A2AHandler>(handler: Arc<H>) -> String {
     let app = a2a_server::a2a_router(handler);
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
@@ -368,4 +422,114 @@ async fn e2e_streaming_message() {
         }
         other => panic!("expected StatusUpdate, got: {other:?}"),
     }
+}
+
+#[tokio::test]
+async fn e2e_streaming_error_mid_stream() {
+    let url = start_server_with(Arc::new(ErrorStreamAgent)).await;
+    let client = A2AClient::new(&url);
+
+    let req = SendMessageRequest {
+        message: Some(Message {
+            message_id: "msg-err".into(),
+            role: Role::User as i32,
+            parts: vec![Part {
+                content: Some(part::Content::Text("trigger error".into())),
+                ..Default::default()
+            }],
+            ..Default::default()
+        }),
+        ..Default::default()
+    };
+
+    let stream = client.send_streaming_message(req).await.unwrap();
+    tokio::pin!(stream);
+
+    // First event should be OK (Working status)
+    let first = stream.next().await.unwrap().unwrap();
+    match first.payload.as_ref().unwrap() {
+        stream_response::Payload::StatusUpdate(e) => {
+            assert_eq!(e.task_id, "task-err");
+        }
+        other => panic!("expected StatusUpdate, got: {other:?}"),
+    }
+
+    // Second event should be an error
+    let second = stream.next().await.unwrap();
+    match second {
+        Err(ClientError::Rpc { code, message, .. }) => {
+            assert_eq!(code, -32603); // Internal error
+            assert!(message.contains("something exploded"));
+        }
+        other => panic!("expected RPC error, got: {other:?}"),
+    }
+}
+
+#[tokio::test]
+async fn e2e_malformed_jsonrpc_invalid_json() {
+    let url = start_server().await;
+    let http = reqwest::Client::new();
+
+    let resp = http
+        .post(&url)
+        .header("content-type", "application/json")
+        .body("not valid json{{{")
+        .send()
+        .await
+        .unwrap();
+
+    // Axum returns 422 for invalid JSON body
+    assert!(
+        resp.status().is_client_error(),
+        "expected 4xx, got {}",
+        resp.status()
+    );
+}
+
+#[tokio::test]
+async fn e2e_malformed_jsonrpc_missing_method() {
+    let url = start_server().await;
+    let http = reqwest::Client::new();
+
+    // Valid JSON but missing required "method" field
+    let resp = http
+        .post(&url)
+        .header("content-type", "application/json")
+        .body(r#"{"jsonrpc": "2.0", "id": 1}"#)
+        .send()
+        .await
+        .unwrap();
+
+    assert!(
+        resp.status().is_client_error(),
+        "expected 4xx for missing method, got {}",
+        resp.status()
+    );
+}
+
+#[tokio::test]
+async fn e2e_malformed_jsonrpc_missing_params() {
+    let url = start_server().await;
+    let client = A2AClient::new(&url);
+
+    // Valid JSON-RPC but missing params — should return InvalidParams error
+    let http = reqwest::Client::new();
+    let resp = http
+        .post(&url)
+        .header("content-type", "application/json")
+        .json(&serde_json::json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "message/send"
+        }))
+        .send()
+        .await
+        .unwrap();
+
+    assert_eq!(resp.status(), 200); // JSON-RPC always returns 200 for valid requests
+    let rpc_resp: JsonRpcResponse = resp.json().await.unwrap();
+    assert!(rpc_resp.error.is_some());
+    assert_eq!(rpc_resp.error.unwrap().code, -32602); // InvalidParams
+
+    let _ = client; // keep client alive to avoid unused warning
 }

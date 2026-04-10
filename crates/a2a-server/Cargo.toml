@@ -20,4 +20,5 @@ thiserror = "2"
 [dev-dependencies]
 tower = { version = "0.5", features = ["util"] }
 a2a-client = { path = "../a2a-client" }
+reqwest = { version = "0.12", features = ["json"] }
 futures-util = "0.3"
