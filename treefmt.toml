@@ -1,0 +1,15 @@
+[global]
+excludes = [
+  "**/target/**",
+  "**/.direnv/**",
+]
+
+[formatter.rust]
+command = "rustfmt"
+options = ["--edition", "2021"]
+includes = ["*.rs"]
+
+[formatter.toml]
+command = "taplo"
+options = ["format"]
+includes = ["*.toml"]
