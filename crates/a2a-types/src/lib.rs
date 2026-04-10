@@ -131,9 +131,12 @@ mod tests {
             content: Some(part::Content::Data(pbjson_types::Value {
                 kind: Some(pbjson_types::value::Kind::StructValue(
                     pbjson_types::Struct {
-                        fields: [("key".into(), pbjson_types::Value {
-                            kind: Some(pbjson_types::value::Kind::StringValue("val".into())),
-                        })]
+                        fields: [(
+                            "key".into(),
+                            pbjson_types::Value {
+                                kind: Some(pbjson_types::value::Kind::StringValue("val".into())),
+                            },
+                        )]
                         .into(),
                     },
                 )),
@@ -257,10 +260,8 @@ mod tests {
 
     #[test]
     fn jsonrpc_response_success() {
-        let resp = JsonRpcResponse::success(
-            serde_json::json!(1),
-            serde_json::json!({"status": "ok"}),
-        );
+        let resp =
+            JsonRpcResponse::success(serde_json::json!(1), serde_json::json!({"status": "ok"}));
         let json = serde_json::to_string(&resp).unwrap();
         let parsed: JsonRpcResponse = serde_json::from_str(&json).unwrap();
         assert_eq!(parsed.jsonrpc, "2.0");

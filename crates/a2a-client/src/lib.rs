@@ -42,8 +42,7 @@ impl A2AClient {
         let mut headers = header::HeaderMap::new();
         headers.insert(
             header::AUTHORIZATION,
-            header::HeaderValue::from_str(&format!("Bearer {token}"))
-                .expect("invalid token"),
+            header::HeaderValue::from_str(&format!("Bearer {token}")).expect("invalid token"),
         );
         Self {
             http: reqwest::Client::builder()

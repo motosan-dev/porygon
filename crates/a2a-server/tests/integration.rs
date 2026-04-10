@@ -35,10 +35,7 @@ impl A2AHandler for TestAgent {
         }
     }
 
-    async fn send_message(
-        &self,
-        req: SendMessageRequest,
-    ) -> Result<SendMessageResponse, A2AError> {
+    async fn send_message(&self, req: SendMessageRequest) -> Result<SendMessageResponse, A2AError> {
         let input_text = req
             .message
             .as_ref()
@@ -113,9 +110,7 @@ impl A2AHandler for TestAgent {
                             artifact_id: "art-1".into(),
                             name: "echo".into(),
                             parts: vec![Part {
-                                content: Some(part::Content::Text(format!(
-                                    "echo: {input_text}"
-                                ))),
+                                content: Some(part::Content::Text(format!("echo: {input_text}"))),
                                 ..Default::default()
                             }],
                             ..Default::default()
@@ -389,10 +384,7 @@ async fn e2e_streaming_message() {
     match events[0].payload.as_ref().unwrap() {
         stream_response::Payload::StatusUpdate(e) => {
             assert_eq!(e.task_id, "task-456");
-            assert_eq!(
-                e.status.as_ref().unwrap().state,
-                TaskState::Working as i32
-            );
+            assert_eq!(e.status.as_ref().unwrap().state, TaskState::Working as i32);
         }
         other => panic!("expected StatusUpdate, got: {other:?}"),
     }

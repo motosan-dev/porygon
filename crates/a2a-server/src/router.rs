@@ -38,9 +38,7 @@ pub fn a2a_router<H: A2AHandler>(handler: Arc<H>) -> Router {
         .with_state(handler)
 }
 
-async fn agent_card_handler<H: A2AHandler>(
-    State(handler): State<Arc<H>>,
-) -> impl IntoResponse {
+async fn agent_card_handler<H: A2AHandler>(State(handler): State<Arc<H>>) -> impl IntoResponse {
     Json(handler.agent_card())
 }
 
@@ -223,9 +221,7 @@ fn stream_to_sse(
 }
 
 /// Parse JSON-RPC params into a typed request, taking ownership to avoid cloning.
-fn parse_params<T: serde::de::DeserializeOwned>(
-    req: &mut JsonRpcRequest,
-) -> Result<T, A2AError> {
+fn parse_params<T: serde::de::DeserializeOwned>(req: &mut JsonRpcRequest) -> Result<T, A2AError> {
     let params = req
         .params
         .take()
@@ -287,10 +283,8 @@ mod tests {
         async fn send_streaming_message(
             &self,
             _req: SendMessageRequest,
-        ) -> Result<
-            Pin<Box<dyn Stream<Item = Result<StreamResponse, A2AError>> + Send>>,
-            A2AError,
-        > {
+        ) -> Result<Pin<Box<dyn Stream<Item = Result<StreamResponse, A2AError>> + Send>>, A2AError>
+        {
             let events = vec![
                 Ok(StreamResponse {
                     payload: Some(stream_response::Payload::StatusUpdate(
@@ -495,9 +489,13 @@ mod tests {
 
         // Each SSE event should be a JSON-RPC response with id=42
         for line in &data_lines {
-            let json_str = line.strip_prefix("data: ").or(line.strip_prefix("data:")).unwrap();
-            let rpc_resp: JsonRpcResponse = serde_json::from_str(json_str)
-                .unwrap_or_else(|e| panic!("failed to parse JSON-RPC response: {e}\nraw: {json_str}"));
+            let json_str = line
+                .strip_prefix("data: ")
+                .or(line.strip_prefix("data:"))
+                .unwrap();
+            let rpc_resp: JsonRpcResponse = serde_json::from_str(json_str).unwrap_or_else(|e| {
+                panic!("failed to parse JSON-RPC response: {e}\nraw: {json_str}")
+            });
             assert_eq!(rpc_resp.jsonrpc, "2.0");
             assert_eq!(rpc_resp.id, serde_json::json!(42));
             assert!(rpc_resp.result.is_some());

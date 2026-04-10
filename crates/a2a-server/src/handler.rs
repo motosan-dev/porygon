@@ -1,6 +1,6 @@
 use a2a_types::{
-    AgentCard, CancelTaskRequest, GetExtendedAgentCardRequest, GetTaskRequest,
-    GetTaskPushNotificationConfigRequest, ListTaskPushNotificationConfigsRequest,
+    AgentCard, CancelTaskRequest, GetExtendedAgentCardRequest,
+    GetTaskPushNotificationConfigRequest, GetTaskRequest, ListTaskPushNotificationConfigsRequest,
     ListTaskPushNotificationConfigsResponse, ListTasksRequest, ListTasksResponse,
     SendMessageRequest, SendMessageResponse, StreamResponse, SubscribeToTaskRequest, Task,
     TaskPushNotificationConfig,
