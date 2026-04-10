@@ -1,0 +1,18 @@
+[package]
+name = "a2a-types"
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+description = "A2A v1.0 protocol types — auto-generated from official protobuf"
+
+[dependencies]
+prost = "0.13"
+prost-types = "0.13"
+pbjson = "0.7"
+pbjson-types = "0.7"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[build-dependencies]
+prost-build = "0.13"
+pbjson-build = "0.7"

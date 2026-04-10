@@ -1,6 +1,9 @@
 [workspace]
 members = [
   "crates/ag-ui-motosan",
+  "crates/a2a-types",
+  "crates/a2a-server",
+  "crates/a2a-client",
 ]
 resolver = "2"
 
