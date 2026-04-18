@@ -1,4 +1,4 @@
-# a2a-client
+# porygon-a2a-client
 
 A2A v1.0 HTTP client for Rust. Supports both blocking JSON-RPC calls and SSE streaming.
 
@@ -8,9 +8,11 @@ Part of the [porygon](https://github.com/motosan-dev/porygon) workspace.
 
 ```toml
 [dependencies]
-a2a-client = "0.1"
-a2a-types = "0.1"
+porygon-a2a-client = "0.1"
+porygon-a2a-types = "0.1"
 ```
+
+The crates are imported as `a2a_client` and `a2a_types`:
 
 ```rust
 use a2a_client::A2AClient;

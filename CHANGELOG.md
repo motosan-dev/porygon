@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.1] - 2026-04-18
+
+### Changed
+- Bumped `motosan-agent-loop` 0.9.4 → 0.13.1 and `motosan-agent-tool` 0.3 → 0.3.2
+- `porygon-ag-ui-motosan`: adapted `translate()` to the new two-layer `AgentEvent` shape (`Core(CoreEvent)` / `Extension(ExtensionEvent)`) introduced upstream; `CoreEvent::IterationStarted` is now a struct variant
+
+### Fixed
+- READMEs: use published `porygon-*` crate names in `[dependencies]` examples (previously showed short names)
+
 ## [0.1.0] - 2026-04-10
 
 ### Added

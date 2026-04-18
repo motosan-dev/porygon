@@ -9,11 +9,11 @@ resolver = "2"
 
 [workspace.package]
 edition = "2021"
-version = "0.1.0"
+version = "0.1.1"
 license = "MIT"
 
 [workspace.dependencies]
 syncable-ag-ui-core = "0.2"
-motosan-agent-loop = { version = "0.9.4", features = ["motosan-ai", "mcp-client"] }
-motosan-agent-tool = "0.3"
+motosan-agent-loop = { version = "0.13.1", features = ["motosan-ai", "mcp-client"] }
+motosan-agent-tool = "0.3.2"
 serde_json = "1"

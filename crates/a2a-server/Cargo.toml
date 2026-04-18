@@ -1,6 +1,6 @@
 [package]
 name = "porygon-a2a-server"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 description = "A2A v1.0 server — handler traits and axum transport"

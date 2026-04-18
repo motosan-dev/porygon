@@ -1,6 +1,6 @@
 [package]
 name = "porygon-a2a-client"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 description = "A2A v1.0 client — reqwest-based HTTP client for A2A agents"

@@ -1,4 +1,4 @@
-# a2a-server
+# porygon-a2a-server
 
 A2A v1.0 server for Rust. Provides an `A2AHandler` trait and an axum-based JSON-RPC router with SSE streaming support.
 
@@ -8,11 +8,11 @@ Part of the [porygon](https://github.com/motosan-dev/porygon) workspace.
 
 ```toml
 [dependencies]
-a2a-server = "0.1"
-a2a-types = "0.1"
+porygon-a2a-server = "0.1"
+porygon-a2a-types = "0.1"
 ```
 
-Implement the `A2AHandler` trait:
+The crates are imported as `a2a_server` and `a2a_types`. Implement the `A2AHandler` trait:
 
 ```rust
 use a2a_server::{A2AHandler, A2AError, a2a_router};
